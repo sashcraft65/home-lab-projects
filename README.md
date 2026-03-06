@@ -297,4 +297,3 @@ Kali (attacker)  192.168.10.18
 
 ---
 
-*Built for learning. Documented for growth.*
