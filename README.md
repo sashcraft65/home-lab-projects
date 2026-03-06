@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 🖥️ Virtual IT Security Home Lab
 
 > A segmented virtual network environment built for hands-on learning in networking, security operations, and ethical hacking. Designed to support progression toward CompTIA Network+, Security+, AWS Cloud Practitioner, and eJPT certifications.
@@ -170,12 +169,16 @@ Rules applied at OPNsense. Read as: `SOURCE → DESTINATION : ACTION`
 
 | Lab Activity | Certification | Domain |
 |---|---|---|
-| Subnetting, VLSM, routing | CompTIA Network+ | IP Addressing |
+| Subnetting, VLSM, routing | CCNA | IP Connectivity |
+| OSI model, switching concepts | CCNA | Network Fundamentals |
+| Inter-VLAN routing, OPNsense | CCNA | IP Connectivity & Services |
 | Firewall rules, segmentation | CompTIA Security+ | Network Security |
-| OSI model application | CompTIA Network+ | Networking Concepts |
-| nmap, Metasploit | eJPT | Penetration Testing |
-| EC2, S3, IAM, VPC | AWS Cloud Practitioner / SAA | Cloud Concepts |
-| SIEM, log monitoring | CompTIA Security+ | Security Operations |
+| Stateful inspection, threat detection | CompTIA Security+ | Security Architecture |
+| nmap, Metasploit, vulnerability scanning | CompTIA Security+ | Security Operations |
+| SIEM, log monitoring, incident response | CompTIA Security+ | Security Operations |
+| EC2, S3, IAM, VPC, Security Groups | AWS SysOps / CloudOps Engineer | Cloud Infrastructure |
+| CloudWatch monitoring, automation | AWS SysOps / CloudOps Engineer | Monitoring & Reporting |
+| Least-privilege IAM, compliance controls | AWS SysOps / CloudOps Engineer | Security & Compliance |
 
 ---
 
@@ -208,6 +211,3 @@ Rules applied at OPNsense. Read as: `SOURCE → DESTINATION : ACTION`
 ---
 
 *Built for learning. Documented for growth.*
-=======
-# Home-Lab-Projects
->>>>>>> 92b8aed28417a25b292420642d9b6ce444f3f79c
