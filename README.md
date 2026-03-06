@@ -152,6 +152,50 @@ Rules are processed **top-down — first match wins.**
 
 ---
 
+## 🔍 Intrusion Detection — Suricata
+
+Suricata is deployed in two places for layered visibility:
+
+| Component | Location | Role |
+|---|---|---|
+| **Suricata IDS — OPNsense** | OPNsense (choke point) | Monitors all inter-segment traffic at the firewall level |
+| **Suricata Agent — Metasploitable 2** | `192.168.10.19` | Host-level visibility of attacks landing on the vulnerable target |
+
+> **IDS vs IPS — Design Decision:** Suricata is configured in **IDS mode (detect only)** — not IPS (inline blocking). This is intentional. In a learning lab, blocking attacks at the firewall prevents you from observing the full attack chain. IDS mode lets all traffic through while generating alerts for analysis in the SIEM.
+
+### Suricata on OPNsense
+- Installed via: `System → Firmware → Plugins → os-suricata`
+- Monitors: LAN_Attack interface — primary choke point for all outbound attack traffic
+- Ruleset: **Emerging Threats Community** (free, industry-standard, actively maintained)
+- Alert log: `/var/log/suricata/eve.json`
+- Mode: **IDS — Alert only, no blocking**
+
+### Suricata Agent on Metasploitable 2
+- Installed directly on the vulnerable VM for host-level detection
+- Captures attack payloads that reach the target after passing through OPNsense
+- Provides a second alert perspective: firewall-level vs host-level
+- Useful for understanding which attacks OPNsense detects vs what actually reaches the host
+
+### Visibility Architecture
+```
+Kali (attacker)  192.168.10.18
+        │
+        ▼
+[OPNsense — Suricata IDS]       ← sees ALL traffic leaving LAN_Attack
+        │
+        │  IDS mode — traffic passes through, alerts generated
+        ▼
+[Metasploitable — Suricata Agent]  ← sees attacks that reach the host
+        │
+        ▼
+   Alert logs (eve.json)
+        │
+        ▼
+[Ubuntu Desktop — Wazuh SIEM]   ← correlates alerts from both sources
+```
+
+---
+
 ## 🗺️ Build Phases
 
 ### ✅ Phase 0 — Planning & Design
@@ -171,17 +215,25 @@ Rules are processed **top-down — first match wins.**
 - [ ] Apply firewall rules per policy table
 - [ ] Verify routing and firewall with ping and nmap
 
-### ⏳ Phase 2 — Administration
+### ⏳ Phase 2 — Administration & Monitoring
 - [ ] Install Active Directory on Windows Server (LAN_Admin)
 - [ ] Configure DNS and DHCP on Windows Server (LAN_DMZ)
 - [ ] Join Ubuntu Desktop to domain
-- [ ] Install Wazuh or Splunk Free on Ubuntu Desktop (SIEM)
+- [ ] Install Wazuh on Ubuntu Desktop (SIEM)
+- [ ] Install Suricata plugin on OPNsense (`os-suricata`)
+- [ ] Enable Emerging Threats Community ruleset on Suricata
+- [ ] Set Suricata to monitor LAN_Attack interface in IDS mode
+- [ ] Install Suricata agent on Metasploitable 2
+- [ ] Configure Wazuh to ingest Suricata `eve.json` logs from both sources
 
 ### ⏳ Phase 3 — Attack & Defense
 - [ ] Run nmap scans from Kali → Metasploitable
 - [ ] Exploit vsftpd 2.3.4 backdoor via Metasploit Framework
 - [ ] Capture and analyze traffic in Wireshark
-- [ ] Review SIEM alerts triggered by attack activity
+- [ ] Review Suricata alerts on OPNsense triggered by nmap and exploits
+- [ ] Review Suricata agent alerts on Metasploitable for host-level visibility
+- [ ] Correlate OPNsense vs host-level alerts in Wazuh SIEM
+- [ ] Compare what OPNsense detects vs what reaches the target
 
 ### ⏳ Phase 4 — Cloud Extension
 - [ ] Configure Ubuntu Server as web host (LAN_DMZ)
@@ -204,6 +256,9 @@ Rules are processed **top-down — first match wins.**
 | Stateful inspection, threat detection | CompTIA Security+ | Security Architecture |
 | DMZ design, defense-in-depth | CompTIA Security+ | Security Architecture |
 | nmap, Metasploit, vulnerability scanning | CompTIA Security+ | Security Operations |
+| Suricata IDS, alert tuning, ruleset management | CompTIA Security+ | Security Operations |
+| Network traffic analysis, threat signatures | CompTIA Security+ | Threat Detection |
+| Log correlation, dual-source SIEM ingestion | CompTIA Security+ | Incident Response |
 | SIEM, log monitoring, incident response | CompTIA Security+ | Security Operations |
 | EC2, S3, IAM, VPC, Security Groups | AWS SysOps / CloudOps Engineer | Cloud Infrastructure |
 | CloudWatch monitoring, automation | AWS SysOps / CloudOps Engineer | Monitoring & Reporting |

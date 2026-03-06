@@ -147,3 +147,141 @@ Navigate to: `Firewall → Rules`
 - [ ] DHCP pools configured for all three active subnets
 - [ ] Firewall rules applied in correct order
 - [ ] All verification tests passed
+
+---
+
+## Suricata IDS — OPNsense Configuration
+
+### Install Suricata Plugin
+```
+System → Firmware → Plugins
+Search: os-suricata
+Click:  Install
+Reboot OPNsense after install
+```
+
+### Enable and Configure Suricata
+```
+Services → Intrusion Detection → Administration
+
+Settings tab:
+  ☑ Enabled
+  ☑ IDS Mode  (NOT IPS — keeps traffic flowing for learning visibility)
+  Interface:  LAN_Attack (vtnet3) — monitor all outbound attack traffic
+  Pattern matcher: Hyperscan (best performance) or AC (fallback)
+```
+
+> ⚠️ **IDS not IPS:** IPS mode would block attacks inline — this prevents you from observing the full attack chain during lab exercises. Always use IDS mode in a learning environment.
+
+### Enable Emerging Threats Ruleset
+```
+Services → Intrusion Detection → Administration → Download tab
+
+Enable:  ☑ ET open/emerging-all.rules
+         (Emerging Threats Community — free, actively maintained)
+
+Click:   Download & Update Rules
+```
+
+### Verify Alerts Are Generating
+```
+Services → Intrusion Detection → Alerts
+
+Run nmap from Kali against any target — alerts should appear within seconds.
+Fields to review:
+  - Timestamp
+  - Source / Destination IP
+  - Alert signature name
+  - Category (e.g. "Attempted Information Leak", "Exploit")
+```
+
+### Alert Log Location
+```
+/var/log/suricata/eve.json   ← JSON format, ingested by Wazuh SIEM
+```
+
+---
+
+## Suricata Agent — Metasploitable 2 Configuration
+
+### Install Suricata on Metasploitable
+```bash
+# SSH into Metasploitable from Kali or Admin machine
+ssh msfadmin@192.168.10.19
+
+# Update package list and install Suricata
+sudo apt-get update
+sudo apt-get install suricata -y
+```
+
+### Configure Suricata to Monitor Local Interface
+```bash
+# Edit Suricata config
+sudo nano /etc/suricata/suricata.yaml
+
+# Set the interface to monitor (eth0 is default on Metasploitable)
+af-packet:
+  - interface: eth0
+
+# Set eve.json log output (should be enabled by default)
+outputs:
+  - eve-log:
+      enabled: yes
+      filename: /var/log/suricata/eve.json
+```
+
+### Download Emerging Threats Rules
+```bash
+sudo suricata-update
+sudo systemctl restart suricata
+sudo systemctl enable suricata
+```
+
+### Verify Suricata is Running
+```bash
+sudo systemctl status suricata
+sudo tail -f /var/log/suricata/eve.json
+```
+
+---
+
+## Wazuh SIEM — Ingest Suricata Logs
+
+Configure Wazuh on Ubuntu Desktop to collect `eve.json` from both sources:
+
+### OPNsense Log Forwarding
+```
+OPNsense: Services → Intrusion Detection → Administration
+  Enable syslog forwarding → Ubuntu Desktop IP (192.168.10.3)
+  Port: 514 UDP
+```
+
+### Metasploitable Agent
+```bash
+# Install Wazuh agent on Metasploitable
+curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | sudo apt-key add -
+# Follow Wazuh agent install docs for Ubuntu/Debian
+# Point agent to Wazuh manager at 192.168.10.3
+```
+
+### Wazuh Manager — Add Suricata Decoder
+```xml
+<!-- Add to /var/ossec/etc/ossec.conf on Wazuh manager -->
+<localfile>
+  <log_format>json</log_format>
+  <location>/var/log/suricata/eve.json</location>
+</localfile>
+```
+
+---
+
+## Suricata Status Checklist
+
+- [ ] Suricata plugin installed on OPNsense
+- [ ] Suricata set to IDS mode on LAN_Attack interface
+- [ ] Emerging Threats ruleset downloaded and active
+- [ ] Alerts visible in OPNsense UI after nmap test
+- [ ] Suricata installed on Metasploitable 2
+- [ ] eve.json logging confirmed on Metasploitable
+- [ ] Wazuh ingesting logs from both sources
+- [ ] Alerts correlating in Wazuh dashboard
