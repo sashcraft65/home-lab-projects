@@ -1,6 +1,6 @@
 # 🖥️ Virtual IT Security Home Lab
 
-> A segmented virtual network environment built for hands-on learning in networking, security operations, and ethical hacking. Designed to support progression toward CompTIA Network+, Security+, AWS Cloud Practitioner, and eJPT certifications.
+> A segmented virtual network environment built for hands-on learning in networking, security operations, and ethical hacking. Designed to support progression toward CompTIA Security+, CCNA, and AWS SysOps / CloudOps Engineer certifications.
 
 ---
 
@@ -23,8 +23,10 @@
 |---|---|
 | **Hypervisor** | Oracle VirtualBox |
 | **Firewall / Router** | OPNsense |
-| **Architecture** | Segmented dual-subnet with firewall enforcement |
-| **Purpose** | Attack/defense simulation, network administration, cloud integration |
+| **Architecture** | Four-segment VLSM network with stateful firewall enforcement |
+| **Base Block** | `192.168.10.0/27` |
+| **Subnetting** | Four `/29` subnets via VLSM |
+| **Purpose** | Attack/defense simulation, network administration, DMZ services, cloud integration |
 | **Status** | 🔧 In Progress — Phase 1 |
 
 ---
@@ -32,80 +34,102 @@
 ## 🌐 Network Topology
 
 ```
-                        INTERNET
-                            │
-                     ┌──────────────┐
-                     │   OPNsense   │  WAN: DHCP (NAT)
-                     │   Firewall   │
-                     └──────┬───────┘
-                            │
-              ┌─────────────┴─────────────┐
-              │                           │
-     ┌────────────────┐         ┌─────────────────┐
-     │  LAN_Admin     │         │   LAN_Attack     │
-     │ 192.168.10.0/28│         │192.168.10.16/28  │
-     │                │         │                  │
-     │ Windows Server │         │  Kali Linux      │
-     │ Ubuntu Monitor │         │  Metasploitable 2│
-     └────────────────┘         └──────────────────┘
+                            INTERNET
+                                │
+                         ┌──────────────┐
+                         │   OPNsense   │  WAN: DHCP (NAT)
+                         │   Firewall   │  vtnet0/vtnet1/vtnet2/vtnet3
+                         └──────┬───────┘
+                                │
+          ┌─────────────┬───────┴────────┬─────────────┐
+          │             │                │             │
+  ┌────────────┐ ┌────────────┐ ┌─────────────┐ ┌──────────────┐
+  │ LAN_Admin  │ │  LAN_DMZ   │ │ LAN_Attack  │ │   Reserved   │
+  │ .0/29      │ │ .8/29      │ │ .16/29      │ │ .24/29       │
+  │            │ │            │ │             │ │              │
+  │ WinServ AD │ │ WinServ DNS│ │ Kali Linux  │ │ Future use   │
+  │ Ubuntu Mon │ │ Ubuntu Svr │ │ Metasploit  │ │              │
+  └────────────┘ └────────────┘ └─────────────┘ └──────────────┘
 
-     Admin → Attack : ALLOW
-     Attack → Admin : BLOCK
-     Admin → WAN    : ALLOW
-     Attack → WAN   : BLOCK
+  Admin  → DMZ    : ALLOW       DMZ    → Admin  : BLOCK
+  Admin  → Attack : ALLOW       Attack → Admin  : BLOCK
+  Admin  → WAN    : ALLOW       Attack → WAN    : BLOCK
+  DMZ    → WAN    : ALLOW       Attack → DMZ    : ALLOW
 ```
 
 ---
 
 ## 📐 Subnet Design
 
-**Base Block:** `192.168.10.0/27` (30 usable IPs)
-Split using VLSM into two `/28` subnets:
+**Base Block:** `192.168.10.0/27` — 32 addresses total
+Split using VLSM into four equal `/29` subnets (6 usable hosts each):
 
 | Segment | Subnet | Network Addr | Usable Range | Broadcast | Purpose |
 |---|---|---|---|---|---|
-| LAN_Admin | `192.168.10.0/28` | `.0` | `.1 – .14` | `.15` | Admin & Monitoring |
-| LAN_Attack | `192.168.10.16/28` | `.16` | `.17 – .30` | `.31` | Attack Lab |
+| LAN_Admin | `192.168.10.0/29` | `.0` | `.1 – .6` | `.7` | Admin, AD, Monitoring |
+| LAN_DMZ | `192.168.10.8/29` | `.8` | `.9 – .14` | `.15` | DNS, DHCP, Web Services |
+| LAN_Attack | `192.168.10.16/29` | `.16` | `.17 – .22` | `.23` | Penetration Testing |
+| Reserved | `192.168.10.24/29` | `.24` | `.25 – .30` | `.31` | Future Expansion |
 
-> **Design rationale:** Segmenting attack machines from admin machines prevents lateral movement. OPNsense enforces all inter-segment traffic via stateful firewall rules.
+> **Design rationale:** Four-segment architecture isolates administrative, DMZ, and attack traffic. OPNsense enforces all inter-segment policy. The DMZ allows internet-facing services without exposing the admin domain. The reserved /29 supports future additions without requiring a full redesign.
 
 ---
 
 ## 🖧 IP Assignment
 
-### LAN_Admin — `192.168.10.0/28`
+### LAN_Admin — `192.168.10.0/29`
 
 | Device | IP Address | Role |
 |---|---|---|
-| OPNsense LAN | `192.168.10.1` | Gateway / Firewall |
-| Windows Server 2022 | `192.168.10.2` | Active Directory, DNS, DHCP |
-| Ubuntu Desktop | `192.168.10.3` | Monitoring / SOC Workstation |
-| *(Reserved)* | `.4 – .14` | Future expansion |
+| OPNsense LAN | `192.168.10.1` | Gateway / Firewall (vtnet1) |
+| Windows Server 2022 | `192.168.10.2` | Active Directory / Domain Controller |
+| Ubuntu Desktop | `192.168.10.3` | Monitoring / SOC Workstation / SIEM |
+| *(Spare)* | `.4 – .6` | Future expansion |
 
-### LAN_Attack — `192.168.10.16/28`
+### LAN_DMZ — `192.168.10.8/29`
 
 | Device | IP Address | Role |
 |---|---|---|
-| OPNsense OPT1 | `192.168.10.17` | Gateway / Firewall |
-| Kali Linux | `192.168.10.18` | Attack Machine |
+| OPNsense OPT1 | `192.168.10.9` | Gateway / Firewall (vtnet2) |
+| Windows Server 2022 | `192.168.10.10` | DNS / DHCP Server |
+| Ubuntu Server | `192.168.10.11` | Web / App Server |
+| *(Spare)* | `.12 – .14` | Future: AWS VPN endpoint, additional services |
+
+### LAN_Attack — `192.168.10.16/29`
+
+| Device | IP Address | Role |
+|---|---|---|
+| OPNsense OPT2 | `192.168.10.17` | Gateway / Firewall (vtnet3) |
+| Kali Linux | `192.168.10.18` | Penetration Testing / Attack Machine |
 | Metasploitable 2 | `192.168.10.19` | Vulnerable Target |
-| *(Reserved)* | `.20 – .30` | Future expansion |
+| *(Spare)* | `.20 – .22` | Future: additional targets |
+
+### Reserved — `192.168.10.24/29`
+
+| Device | IP Address | Role |
+|---|---|---|
+| *(Unassigned)* | `.25 – .30` | Future expansion — no gateway configured until needed |
 
 ---
 
 ## 🔥 Firewall Policy
 
 Rules applied at OPNsense. Read as: `SOURCE → DESTINATION : ACTION`
+Rules are processed **top-down — first match wins.**
 
 | # | Source | Destination | Action | Reason |
 |---|---|---|---|---|
-| 1 | `192.168.10.0/28` | `192.168.10.16/28` | ✅ Allow | Admin can reach attack lab |
-| 2 | `192.168.10.16/28` | `192.168.10.0/28` | ❌ Block | Prevent lateral movement to admin |
-| 3 | `192.168.10.0/28` | `0.0.0.0/0` | ✅ Allow | Admin internet access |
-| 4 | `192.168.10.16/28` | `0.0.0.0/0` | ❌ Block | Isolate attack lab from internet |
-| 5 | `ANY` | `ANY` | ❌ Block | Implicit deny — all unmatched traffic |
+| 1 | `192.168.10.0/29` | `192.168.10.8/29` | ✅ Allow | Admin manages DMZ servers |
+| 2 | `192.168.10.0/29` | `192.168.10.16/29` | ✅ Allow | Admin can reach attack lab |
+| 3 | `192.168.10.0/29` | `0.0.0.0/0` | ✅ Allow | Admin internet access |
+| 4 | `192.168.10.8/29` | `192.168.10.0/29` | ❌ Block | DMZ cannot reach admin / AD |
+| 5 | `192.168.10.8/29` | `0.0.0.0/0` | ✅ Allow | DMZ services need internet |
+| 6 | `192.168.10.16/29` | `192.168.10.0/29` | ❌ Block | Prevent lateral movement to admin |
+| 7 | `192.168.10.16/29` | `192.168.10.8/29` | ✅ Allow | Attack lab can target DMZ |
+| 8 | `192.168.10.16/29` | `0.0.0.0/0` | ❌ Block | Attack lab internet isolated |
+| 9 | `ANY` | `ANY` | ❌ Block | Implicit deny — all unmatched traffic |
 
-> **Note:** OPNsense is a **stateful firewall**. Return traffic for established connections is automatically permitted — no explicit inbound rules required.
+> **Note:** OPNsense is a **stateful firewall**. Return traffic for established connections is automatically permitted via connection tracking — no explicit inbound rules required.
 
 ---
 
@@ -113,17 +137,18 @@ Rules applied at OPNsense. Read as: `SOURCE → DESTINATION : ACTION`
 
 | VM | OS | vDisk | Purpose | Network |
 |---|---|---|---|---|
-| OPNsense | FreeBSD-based | 16 GB | Firewall / Router | WAN + LAN_Admin + LAN_Attack |
-| Windows Server 2022 | Windows Server | 50 GB | AD, DNS, DHCP, Admin | LAN_Admin |
+| OPNsense | FreeBSD-based | 16 GB | Firewall / Router | WAN + LAN_Admin + LAN_DMZ + LAN_Attack |
+| Windows Server 2022 (AD) | Windows Server | 50 GB | Active Directory, Domain Controller | LAN_Admin |
 | Ubuntu Desktop | Ubuntu 22.04 | 25 GB | Monitoring, SIEM | LAN_Admin |
+| Windows Server 2022 (DNS) | Windows Server | 50 GB | DNS, DHCP | LAN_DMZ |
+| Ubuntu Server | Ubuntu Server LTS | 25 GB | Web / App Server | LAN_DMZ |
 | Kali Linux | Debian-based | 40 GB | Penetration Testing | LAN_Attack |
 | Metasploitable 2 | Ubuntu-based | 8 GB | Vulnerable Target | LAN_Attack |
 
 ### Planned Additions
-| VM | Purpose | Network |
+| VM / Service | Purpose | Network |
 |---|---|---|
-| Ubuntu Server | Web / App Server | LAN_Admin |
-| AWS EC2 + S3 | Cloud hosting, hybrid extension | Public / VPN |
+| AWS EC2 + S3 | Cloud hosting, hybrid cloud extension | Public / VPN into LAN_DMZ |
 
 ---
 
@@ -131,37 +156,40 @@ Rules applied at OPNsense. Read as: `SOURCE → DESTINATION : ACTION`
 
 ### ✅ Phase 0 — Planning & Design
 - [x] Define lab objectives and certification targets
-- [x] Design network topology and segmentation
-- [x] Calculate subnets using VLSM
-- [x] Define firewall policy
+- [x] Design four-segment network topology
+- [x] Calculate subnets using VLSM (`/27` → four `/29`s)
+- [x] Define firewall policy for all segments
+- [x] Assign host IPs across all subnets
 - [x] Provision all VMs in VirtualBox
 
 ### 🔧 Phase 1 — Foundation (Current)
 - [ ] Configure VirtualBox adapters for all VMs
-- [ ] Reset OPNsense and assign WAN / LAN / OPT1 interfaces
-- [ ] Set static IPs on OPNsense
-- [ ] Configure DHCP on OPNsense for both subnets
-- [ ] Verify inter-subnet routing and firewall rules
-- [ ] Test connectivity with ping and nmap
+- [ ] Reset OPNsense to factory defaults
+- [ ] Assign WAN / LAN / OPT1 / OPT2 interfaces in OPNsense
+- [ ] Set static gateway IPs on all OPNsense interfaces
+- [ ] Configure DHCP pools for all three active subnets
+- [ ] Apply firewall rules per policy table
+- [ ] Verify routing and firewall with ping and nmap
 
 ### ⏳ Phase 2 — Administration
-- [ ] Install Active Directory on Windows Server 2022
-- [ ] Configure DNS and DHCP on Windows Server
+- [ ] Install Active Directory on Windows Server (LAN_Admin)
+- [ ] Configure DNS and DHCP on Windows Server (LAN_DMZ)
 - [ ] Join Ubuntu Desktop to domain
-- [ ] Install Wazuh or Splunk Free on Ubuntu (SIEM)
+- [ ] Install Wazuh or Splunk Free on Ubuntu Desktop (SIEM)
 
 ### ⏳ Phase 3 — Attack & Defense
 - [ ] Run nmap scans from Kali → Metasploitable
-- [ ] Exploit vsftpd 2.3.4 backdoor via Metasploit
+- [ ] Exploit vsftpd 2.3.4 backdoor via Metasploit Framework
 - [ ] Capture and analyze traffic in Wireshark
-- [ ] Review alerts generated in SIEM
+- [ ] Review SIEM alerts triggered by attack activity
 
 ### ⏳ Phase 4 — Cloud Extension
-- [ ] Deploy Ubuntu Server locally
+- [ ] Configure Ubuntu Server as web host (LAN_DMZ)
 - [ ] Launch AWS EC2 instance
 - [ ] Host static website on S3
-- [ ] Configure Security Groups (AWS equivalent of firewall rules)
-- [ ] Set up IAM roles and least-privilege access
+- [ ] Configure Security Groups (AWS firewall equivalent)
+- [ ] Set up IAM roles with least-privilege access
+- [ ] Establish VPN tunnel between lab DMZ and AWS VPC
 
 ---
 
@@ -174,6 +202,7 @@ Rules applied at OPNsense. Read as: `SOURCE → DESTINATION : ACTION`
 | Inter-VLAN routing, OPNsense | CCNA | IP Connectivity & Services |
 | Firewall rules, segmentation | CompTIA Security+ | Network Security |
 | Stateful inspection, threat detection | CompTIA Security+ | Security Architecture |
+| DMZ design, defense-in-depth | CompTIA Security+ | Security Architecture |
 | nmap, Metasploit, vulnerability scanning | CompTIA Security+ | Security Operations |
 | SIEM, log monitoring, incident response | CompTIA Security+ | Security Operations |
 | EC2, S3, IAM, VPC, Security Groups | AWS SysOps / CloudOps Engineer | Cloud Infrastructure |
@@ -189,24 +218,27 @@ Rules applied at OPNsense. Read as: `SOURCE → DESTINATION : ACTION`
 **Status:** ✅ Complete
 
 **Completed:**
-- Designed dual-subnet architecture using VLSM
-- Split `192.168.10.0/27` into two `/28` subnets
-- Defined 4-rule firewall policy with implicit deny
+- Designed four-segment architecture: LAN_Admin, LAN_DMZ, LAN_Attack, Reserved
+- Split `192.168.10.0/27` into four `/29` subnets using VLSM
+- Separated Windows Server roles — AD in LAN_Admin, DNS/DHCP in LAN_DMZ
+- Defined 8-rule firewall policy with implicit deny
 - Studied stateful vs stateless firewall behavior
-- Mapped lab components to OSI model layers
+- Mapped lab components to OSI model layers 1–7
 - Understood nmap operation across Layers 2, 3, and 4
 
 **Key Concepts Learned:**
-- `/27 → two /28s` using VLSM — network address boundaries
-- Firewall rules read top-down, first match wins
-- `ANY → ANY : Allow` at top = no firewall at all (misconfiguration risk)
-- Stateful firewalls track connection state — return traffic auto-permitted
-- OPNsense operates at Layers 3, 4, and 7 (with DPI)
-- Network address (`.16`) is reserved — first usable host is `.17`
+- Each borrowed subnet bit halves available host addresses
+- VLSM right-sizes subnets to actual host requirements
+- Firewall rules read top-down — first match wins — rule order is critical
+- `ANY → ANY : Allow` at top nullifies all rules below it
+- Stateful firewalls auto-permit return traffic via connection tracking
+- Network address is never assignable — first usable IP goes to the gateway
+- DMZ isolates internet-facing services from internal AD/admin infrastructure
 
 **Next Session:**
-- Configure VirtualBox adapters
+- Configure VirtualBox adapters (4 adapters on OPNsense)
 - Reset and reconfigure OPNsense from scratch
+- Assign all four interfaces and set gateway IPs
 
 ---
 
