@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🖥️ Virtual IT Security Home Lab
 
 > A segmented virtual network environment built for hands-on learning in networking, security operations, and ethical hacking. Designed to support progression toward CompTIA Network+, Security+, AWS Cloud Practitioner, and eJPT certifications.
@@ -207,3 +208,6 @@ Rules applied at OPNsense. Read as: `SOURCE → DESTINATION : ACTION`
 ---
 
 *Built for learning. Documented for growth.*
+=======
+# Home-Lab-Projects
+>>>>>>> 92b8aed28417a25b292420642d9b6ce444f3f79c
