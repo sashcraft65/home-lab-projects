@@ -15,6 +15,17 @@
 - [Certification Mapping](#certification-mapping)
 - [Journal](#journal)
 
+## 📁 Documentation Index
+
+| File | Description |
+|---|---|
+| [docs/opnsense-setup.md](docs/opnsense-setup.md) | OPNsense interface config, DHCP, verification |
+| [docs/firewall-suricata-setup.md](docs/firewall-suricata-setup.md) | Firewall rules, Suricata IDS, Wazuh integration |
+| [diagrams/network-topology.pdf](diagrams/network-topology.pdf) | Full network topology diagram |
+| [journal/](journal/) | Session-by-session build journal |
+
+---
+
 ---
 
 ## 🧭 Lab Overview
