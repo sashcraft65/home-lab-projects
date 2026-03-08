@@ -192,11 +192,11 @@ DNS:        8.8.8.8 (temporary)
 
 | Screenshot | Description |
 |---|---|
-| ![NTP Config](evidence/entry-003/ntp-configuration.png) | NTP servers and LAN_Admin interface binding |
-| ![Kea DHCP Subnets](evidence/entry-003/kea-dhcp-subnets.png) | Three DHCP subnets configured |
-| ![Kea Reservations](evidence/entry-003/kea-dhcp-reservations.png) | Five static MAC reservations |
-| ![SSH Config](evidence/entry-003/ssh-configuration.png) | SSH enabled on LAN_Admin only |
-| ![Password Change](evidence/entry-003/password-change.png) | Root password change evidence |
+| ![NTP Config](evidence/entry-003/NTP-Configuration.png) | NTP servers and LAN_Admin interface binding |
+| ![Kea DHCP Subnets](evidence/entry-003/Configure-Subnet-Pools.png) | Three DHCP subnets configured |
+| ![Kea Reservations](evidence/entry-003/Static-DHCP-Reservations.png) | Five static MAC reservations |
+| ![SSH Config](evidence/entry-003/Enable-SSH-LAN-Admin-Only.png) | SSH enabled on LAN_Admin only |
+| ![Password Change](evidence/entry-003/Change-Root-Password.png) | Root password change evidence |
 
 ---
 
