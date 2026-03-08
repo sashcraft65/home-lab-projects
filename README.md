@@ -207,10 +207,11 @@ Kali (attacker)  192.168.10.18
 - [x] Provision all VMs in VirtualBox
 
 ### 🔧 Phase 1 — Foundation (Current)
-- [ ] Configure VirtualBox adapters for all VMs
-- [ ] Reset OPNsense to factory defaults
-- [ ] Assign WAN / LAN / OPT1 / OPT2 interfaces in OPNsense
-- [ ] Set static gateway IPs on all OPNsense interfaces
+- [x] Configure VirtualBox adapters for all VMs
+- [x] Reset OPNsense to factory defaults
+- [x] Assign WAN / LAN / OPT1 / OPT2 interfaces in OPNsense
+- [x] Set static gateway IPs on all OPNsense interfaces
+- [ ] Rename OPT1 → LAN_DMZ and OPT2 → LAN_Attack in web GUI
 - [ ] Configure DHCP pools for all three active subnets
 - [ ] Apply firewall rules per policy table
 - [ ] Verify routing and firewall with ping and nmap
@@ -266,34 +267,15 @@ Kali (attacker)  192.168.10.18
 
 ---
 
-## 📓 Journal
+## 📓 Build Journal
 
-### Entry 001 — Lab Design & Theory
-**Date:** 2026-03-06
-**Status:** ✅ Complete
+Session-by-session documentation of the lab build process, concepts learned, and decisions made.
 
-**Completed:**
-- Designed four-segment architecture: LAN_Admin, LAN_DMZ, LAN_Attack, Reserved
-- Split `192.168.10.0/27` into four `/29` subnets using VLSM
-- Separated Windows Server roles — AD in LAN_Admin, DNS/DHCP in LAN_DMZ
-- Defined 8-rule firewall policy with implicit deny
-- Studied stateful vs stateless firewall behavior
-- Mapped lab components to OSI model layers 1–7
-- Understood nmap operation across Layers 2, 3, and 4
-
-**Key Concepts Learned:**
-- Each borrowed subnet bit halves available host addresses
-- VLSM right-sizes subnets to actual host requirements
-- Firewall rules read top-down — first match wins — rule order is critical
-- `ANY → ANY : Allow` at top nullifies all rules below it
-- Stateful firewalls auto-permit return traffic via connection tracking
-- Network address is never assignable — first usable IP goes to the gateway
-- DMZ isolates internet-facing services from internal AD/admin infrastructure
-
-**Next Session:**
-- Configure VirtualBox adapters (4 adapters on OPNsense)
-- Reset and reconfigure OPNsense from scratch
-- Assign all four interfaces and set gateway IPs
+| Entry | Topic | Date | Status |
+|---|---|---|---|
+| [Entry 001](journal/entry-001-lab-design.md) | Lab Design & Theory — Subnetting, VLSM, Firewall Policy | 2026-03-06 | ✅ Complete |
+| [Entry 002](journal/entry-002-opnsense-config.md) | OPNsense Interface Configuration | 2026-03-07 | ✅ Complete |
 
 ---
 
+*Built for learning. Documented for growth.*
