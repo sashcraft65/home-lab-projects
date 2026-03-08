@@ -222,10 +222,10 @@ Kali (attacker)  192.168.10.18
 - [x] Reset OPNsense to factory defaults
 - [x] Assign WAN / LAN / OPT1 / OPT2 interfaces in OPNsense
 - [x] Set static gateway IPs on all OPNsense interfaces
-- [ ] Rename OPT1 → LAN_DMZ and OPT2 → LAN_Attack in web GUI
+- [x] Rename OPT1 → LAN_DMZ and OPT2 → LAN_Attack in web GUI
 - [ ] Configure DHCP pools for all three active subnets
-- [ ] Apply firewall rules per policy table
-- [ ] Verify routing and firewall with ping and nmap
+- [x] Apply firewall rules per policy table
+- [x] Verify routing and firewall — LAN_Admin ping tests passed
 
 ### ⏳ Phase 2 — Administration & Monitoring
 - [ ] Install Active Directory on Windows Server (LAN_Admin)
@@ -285,6 +285,7 @@ Session-by-session documentation of the lab build process, concepts learned, and
 | Entry | Topic | Date | Status |
 |---|---|---|---|
 | [Entry 001](journal/entry-001-lab-design.md) | Lab Design & Theory — Subnetting, VLSM, Firewall Policy | 2026-03-06 | ✅ Complete |
+| [Entry 002](journal/entry-002-opnsense-config.md) | OPNsense Install, Interface Config, Firewall Rules | 2026-03-07 | ✅ Complete |
 | [Entry 002](journal/entry-002-opnsense-config.md) | OPNsense Interface Configuration | 2026-03-07 | ✅ Complete |
 
 ---
