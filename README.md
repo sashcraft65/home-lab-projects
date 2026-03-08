@@ -223,7 +223,7 @@ Kali (attacker)  192.168.10.18
 - [x] Assign WAN / LAN / OPT1 / OPT2 interfaces in OPNsense
 - [x] Set static gateway IPs on all OPNsense interfaces
 - [x] Rename OPT1 → LAN_DMZ and OPT2 → LAN_Attack in web GUI
-- [ ] Configure DHCP pools for all three active subnets
+- [x] Configure DHCP pools for all three active subnets
 - [x] Apply firewall rules per policy table
 - [x] Verify routing and firewall — LAN_Admin ping tests passed
 
@@ -286,6 +286,7 @@ Session-by-session documentation of the lab build process, concepts learned, and
 |---|---|---|---|
 | [Entry 001](journal/entry-001-lab-design.md) | Lab Design & Theory — Subnetting, VLSM, Firewall Policy | 2026-03-06 | ✅ Complete |
 | [Entry 002](journal/entry-002-opnsense-config.md) | OPNsense Install, Interface Config, Firewall Rules | 2026-03-07 | ✅ Complete |
+| [Entry 003](journal/entry-003-opnsense-hardening.md) | OPNsense Hardening — DHCP, SSH, NTP, Password, Hostname | 2026-03-08 | ✅ Complete |
 | [Entry 002](journal/entry-002-opnsense-config.md) | OPNsense Interface Configuration | 2026-03-07 | ✅ Complete |
 
 ---
