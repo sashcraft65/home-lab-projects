@@ -287,7 +287,7 @@ Session-by-session documentation of the lab build process, concepts learned, and
 | [Entry 001](journal/entry-001-lab-design.md) | Lab Design & Theory — Subnetting, VLSM, Firewall Policy | 2026-03-06 | ✅ Complete |
 | [Entry 002](journal/entry-002-opnsense-config.md) | OPNsense Install, Interface Config, Firewall Rules | 2026-03-07 | ✅ Complete |
 | [Entry 003](journal/entry-003-opnsense-hardening.md) | OPNsense Hardening — DHCP, SSH, NTP, Password, Hostname | 2026-03-08 | ✅ Complete |
-| [Entry 002](journal/entry-002-opnsense-config.md) | OPNsense Interface Configuration | 2026-03-07 | ✅ Complete |
+| [Entry 004](journal/entry-004-active-directory.md) | Active Directory Installation & DC Configuration | 2026-03-08 | 🔧 In Progress |
 
 ---
 
