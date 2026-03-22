@@ -1,7 +1,7 @@
 # Entry 004 — Active Directory Installation & DC Configuration
 
-**Date:** 2026-03-08
-**Status:** 🔧 In Progress
+**Date:** 2026-03-21
+**Status:** ✅ Complete
 **Phase:** Phase 2 — Administration & Monitoring
 
 ---
@@ -124,7 +124,7 @@ Global Group:        *Domain Users
 
 ---
 
-## DC Rename Issue — In Progress
+## DC Rename Issue — ✅ Resolved
 
 Attempted to rename DC from auto-generated name to DC01 via
 Windows GUI (System Properties → Computer Name → Change).
@@ -140,12 +140,22 @@ update the AD computer account. The old computer account name
 remained in AD while the machine hostname changed — breaking
 the secure channel between the machine and the domain.
 
-**Fix Plan:**
+**Fix Applied:**
 ```
-Step 1 → Boot into DSRM
-Step 2 → Demote DC back to regular server
-Step 3 → Rename to DC01 while not a DC
-Step 4 → Re-promote to Domain Controller
+Step 1 → Booted into DSRM (.\Administrator + DSRM password)
+Step 2 → Demoted DC via Server Manager → Remove Roles and Features
+Step 3 → Hostname DC01 already set from previous rename attempt
+Step 4 → Re-promoted via Server Manager → New Forest → lab.local
+Step 5 → Rebooted → LAB\Administrator login successful ✅
+```
+
+**Verified with nltest:**
+```
+DC:           \\DC01.lab.local  ✅
+Address:      \\192.168.10.2    ✅
+Dom Name:     lab.local         ✅
+Forest Name:  lab.local         ✅
+Flags:        PDC GC DS LDAP KDC TIMESERV WRITABLE DNS_DC ✅
 ```
 
 **Lesson learned:** Always rename a server BEFORE promoting to DC,
@@ -153,6 +163,7 @@ or use PowerShell Rename-Computer which handles AD account updates:
 ```powershell
 Rename-Computer -NewName "DC01" -DomainCredential LAB\Administrator -Restart
 ```
+Never rename a Domain Controller via the GUI after promotion.
 
 ---
 
@@ -189,7 +200,8 @@ All OPNsense DNS queries now resolve through the AD DNS server first.
 |---|---|
 | ![AD Verification](evidence/entry-004/ad-verification.png) | nltest and net user output confirming AD operational |
 | [dcdiag-output.txt](evidence/entry-004/dcdiag-output.txt) | Full dcdiag output — all tests passed |
-| ![nslookup](evidence/entry-004/nslookup-lab-local.png) | nslookup confirming DNS resolving lab.local to 192.168.10.2 |
+| ![nslookup](evidence/entry-004/nslookup-lab-local.png) | ⚠️ screenshot pending |
+| ![DC01 Trust Fix](evidence/entry-004/DC01-Trust-Fix.png) | nltest confirming DC01.lab.local after trust fix |
 
 ---
 
