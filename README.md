@@ -228,7 +228,7 @@ Kali (attacker)  192.168.10.18
 - [x] Verify routing and firewall — LAN_Admin ping tests passed
 
 ### ⏳ Phase 2 — Administration & Monitoring
-- [ ] Install Active Directory on Windows Server (LAN_Admin)
+- [x] Install Active Directory on Windows Server (LAN_Admin)
 - [ ] Configure DNS and DHCP on Windows Server (LAN_DMZ)
 - [ ] Join Ubuntu Desktop to domain
 - [ ] Install Wazuh on Ubuntu Desktop (SIEM)
