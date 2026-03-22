@@ -15,7 +15,12 @@
 - Disabled IPv6 on WinServ
 - Verified AD with dcdiag and nltest
 - Created test domain user (testuser@lab.local)
-- Attempted DC rename to DC01 — trust relationship issue encountered
+- Encountered and resolved DC rename trust relationship issue
+- Successfully renamed DC to DC01 via demote → rename → re-promote
+- Created OU structure — Lab_Users, Lab_Computers, Lab_Servers
+- Moved testuser into Lab_Users OU
+- Verified Group Policy application with gpresult
+- Verified DNS health with dcdiag /test:dns
 
 ---
 
@@ -26,7 +31,7 @@ Domain:              lab.local
 NetBIOS Name:        LAB
 Forest Level:        Windows Server 2016
 Domain Level:        Windows Server 2016
-Domain Controller:   DC01 (rename in progress)
+Domain Controller:   DC01.lab.local
 DC IP:               192.168.10.2
 DNS:                 192.168.10.2 (self-hosted)
 Fallback DNS:        8.8.8.8
@@ -124,6 +129,54 @@ Global Group:        *Domain Users
 
 ---
 
+---
+
+## OU Structure
+
+Organized AD with three Organizational Units for clean administration:
+
+| OU | Purpose |
+|---|---|
+| Lab_Users | Domain user accounts |
+| Lab_Computers | Workstations joined to domain |
+| Lab_Servers | Member servers |
+
+testuser moved from default Users container → Lab_Users OU.
+
+> In production, OUs allow Group Policy to be applied selectively.
+> A password policy for IT doesn't need to apply to HR.
+> OU design is a core enterprise AD and Security+ concept.
+
+---
+
+## Group Policy Verification
+
+```cmd
+gpresult /r /scope computer
+```
+
+```
+OS Configuration:   Primary Domain Controller
+Domain Name:        LAB
+Group Policy from:  DC01.lab.local
+Last GPO applied:   3/21/2026
+
+Applied GPOs:
+  Default Domain Controllers Policy
+  Default Domain Policy
+
+Security Groups:
+  Domain Controllers
+  ENTERPRISE DOMAIN CONTROLLERS
+  BUILTIN\Administrators
+```
+
+> gpresult is the primary troubleshooting tool for Group Policy issues
+> in enterprise environments. If a policy isn't applying, this is the
+> first command you run.
+
+---
+
 ## DC Rename Issue — ✅ Resolved
 
 Attempted to rename DC from auto-generated name to DC01 via
@@ -178,6 +231,10 @@ Never rename a Domain Controller via the GUI after promotion.
 - Never rename a DC via GUI — use PowerShell or rename before promotion
 - DSRM password is the emergency recovery credential — never lose it
 - PDC, GC, KDC, DNS_DC flags in nltest confirm full DC functionality
+- OUs organize AD objects and enable selective Group Policy application
+- gpresult /r shows which policies are applied to a machine
+- Demotion via Server Manager is cleaner than PowerShell in recovery mode
+- All AD objects are wiped on demotion — users, OUs, GPOs, computer accounts
 
 ---
 
@@ -202,15 +259,16 @@ All OPNsense DNS queries now resolve through the AD DNS server first.
 | [dcdiag-output.txt](evidence/entry-004/dcdiag-output.txt) | Full dcdiag output — all tests passed |
 | ![nslookup](evidence/entry-004/nslookup-lab-local.png) | ⚠️ screenshot pending |
 | ![DC01 Trust Fix](evidence/entry-004/DC01-Trust-Fix.png) | nltest confirming DC01.lab.local after trust fix |
+| ![DNS Verification](evidence/entry-004/dns-verification.png) | dcdiag /test:dns and nslookup after re-promotion |
+| ![OU Structure](evidence/entry-004/ad-ou-structure.png) | Lab_Users, Lab_Computers, Lab_Servers OUs with testuser |
+| ![GPResult 1](evidence/entry-004/gpresult-1.png) | Group Policy result — DC configuration and applied policies |
+| ![GPResult 2](evidence/entry-004/gpresult-2.png) | Group Policy result — security groups and applied GPOs |
 
 ---
 
 ## Next Session
 
-- Boot into DSRM on WinServ
-- Demote DC back to member server
-- Rename server to DC01
-- Re-promote to Domain Controller
-- Verify nltest and dcdiag after rename
-- Install Guest Additions on all VMs
+- Install Guest Additions on DC01
 - Boot Kali and verify firewall Block rules
+- Configure DNS/DHCP on WinServ DNS (LAN_DMZ)
+- Install Ubuntu Server as web host
