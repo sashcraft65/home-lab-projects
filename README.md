@@ -230,7 +230,7 @@ Kali (attacker)  192.168.10.18
 ### ⏳ Phase 2 — Administration & Monitoring
 - [x] Install Active Directory on Windows Server (LAN_Admin)
 - [x] Configure DNS and DHCP on Windows Server (LAN_DMZ)
-- [ ] Join Ubuntu Desktop to domain
+- [x] Join Ubuntu Desktop to domain
 - [ ] Install Wazuh on Ubuntu Desktop (SIEM)
 - [ ] Install Suricata plugin on OPNsense (`os-suricata`)
 - [ ] Enable Emerging Threats Community ruleset on Suricata
@@ -289,6 +289,7 @@ Session-by-session documentation of the lab build process, concepts learned, and
 | [Entry 003](journal/entry-003-opnsense-hardening.md) | OPNsense Hardening — DHCP, SSH, NTP, Password, Hostname | 2026-03-08 | ✅ Complete |
 | [Entry 004](journal/entry-004-active-directory.md) | Active Directory Installation & DC Configuration | 2026-03-21 | ✅ Complete |
 | [Entry 005](journal/entry-005-dns01-kea-dhcp.md) | Kea DHCP Troubleshooting & DNS01 Configuration | 2026-03-21 | ✅ Complete |
+| [Entry 006](journal/entry-006-ubuntu-monitor-setup.md) | Ubuntu Monitor Setup & Domain Join | 2026-03-25 | ✅ Complete |
 
 ---
 
